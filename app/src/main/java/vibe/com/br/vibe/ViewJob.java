@@ -1,14 +1,18 @@
 package vibe.com.br.vibe;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -28,19 +32,58 @@ public class ViewJob extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_job);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Bundle extras = getIntent().getExtras();
 
         Job job = new Job();
         job.setId(extras.getString("id"));
         job.setTitulo(extras.getString("titulo"));
+        job.setNivel_de_escolaridade(extras.getString("escolaridade"));
+        job.setTipo_de_contrato(extras.getString("contrato"));
+        job.setArea_de_atuacao(extras.getString("area"));
 
-        lista = (ListView) findViewById(R.id.listViewCandidateId);
-
-        TextView txtTitulo = (TextView) findViewById(R.id.txtTituloCandidate);
+        TextView txtTitulo = (TextView) findViewById(R.id.txtTituloVaga);
+        TextView txtEscolaridade = (TextView) findViewById(R.id.txtEscolaridadeVaga);
+        TextView txtContrato = (TextView) findViewById(R.id.txtContratoVaga);
+        TextView txtArea = (TextView) findViewById(R.id.txtAreaVaga);
 
         txtTitulo.setText(job.getTitulo());
+        txtEscolaridade.setText("Escolaridade: "+job.getNivel_de_escolaridade());
+        txtContrato.setText("Contrato: "+job.getTipo_de_contrato());
+        txtArea.setText("Área de Atuação: "+job.getArea_de_atuacao());
 
-        new AsyncCandidate(job, this).execute();
+        getSupportActionBar().setTitle(job.getTitulo());
+
+        new AsyncCandidate(job).execute();
+    }
+
+    private AdapterView.OnItemClickListener onClickItem(final List<Candidate> candidates)
+    {
+        return new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Candidate candidate = (Candidate) candidates.get(position);
+
+                Log.d("Info","Foi clicado em algum anuncio!");
+
+                Intent intent = new Intent(ViewJob.this, MoreCandidate.class);
+                intent.putExtra("id",candidate.getId());
+
+                startActivity(intent);
+            }
+        };
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                startActivity(new Intent(ViewJob.this,MainActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private class CustomJobAdapter extends BaseAdapter {
@@ -85,19 +128,17 @@ public class ViewJob extends AppCompatActivity {
     private class AsyncCandidate extends AsyncTask<Void, Void, List<Candidate>> {
 
         private Job job;
-        private Context context;
 
-        public AsyncCandidate(Job job, Context context)
+        public AsyncCandidate(Job job)
         {
             this.job = job;
-            this.context = context;
         }
 
         @Override
         protected List<Candidate> doInBackground(Void... voids) {
             JobRequest jRequest = new JobRequest();
             try {
-                return jRequest.candidates(job,context);
+                return jRequest.candidates(job);
             } catch (MalformedURLException e) {
             }
             return null;
@@ -105,12 +146,12 @@ public class ViewJob extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<Candidate> candidates) {
-//                Log.d("isso", String.valueOf(candidates.size()));
-//            lista = (ListView) findViewById(R.id.listViewId);
-//
-//            CustomJobAdapter customJobAdapter = new CustomJobAdapter(candidates);
-//
-//            lista.setAdapter(customJobAdapter);
+            lista = (ListView) findViewById(R.id.listViewCandidateId);
+
+            CustomJobAdapter customJobAdapter = new CustomJobAdapter(candidates);
+
+            lista.setAdapter(customJobAdapter);
+            lista.setOnItemClickListener(onClickItem(candidates));
         }
     }
 }

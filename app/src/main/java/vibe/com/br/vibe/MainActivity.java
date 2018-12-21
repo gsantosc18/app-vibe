@@ -44,16 +44,16 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Job job = (Job) jobs.get(position);
 
-//                Intent intent = new Intent(MainActivity.this);
                 Log.d("Info","Foi clicado em algum anuncio!");
 
                 Intent intent = new Intent(MainActivity.this, ViewJob.class);
                 intent.putExtra("id",job.getId());
                 intent.putExtra("titulo",job.getTitulo());
+                intent.putExtra("escolaridade",job.getNivel_de_escolaridade());
+                intent.putExtra("contrato",job.getTipo_de_contrato());
+                intent.putExtra("area",job.getArea_de_atuacao());
 
                 startActivity(intent);
-
-//                new AssyncOnItemClick(job,MainActivity.this).execute();
             }
         };
     }
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
             JobRequest jobRequest = new JobRequest();
 
             try {
-                List<Candidate> candidates = jobRequest.candidates(job,MainActivity.this);
+                List<Candidate> candidates = jobRequest.candidates(job);
             } catch (MalformedURLException e) {
                 return false;
             }

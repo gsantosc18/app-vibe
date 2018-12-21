@@ -4,6 +4,24 @@ public class Candidate {
     private String id;
     private String email;
     private String nome;
+    private String experiencia;
+    private String resumo;
+
+    public String getExperiencia() {
+        return experiencia;
+    }
+
+    public void setExperiencia(String experiencia) {
+        this.experiencia = experiencia;
+    }
+
+    public String getResumo() {
+        return resumo;
+    }
+
+    public void setResumo(String resumo) {
+        this.resumo = resumo;
+    }
 
     public String getId() {
         return id;

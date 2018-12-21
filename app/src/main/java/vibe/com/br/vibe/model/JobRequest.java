@@ -19,6 +19,7 @@ import java.util.Map;
 public class JobRequest {
 
     private final String ENDPOINT = "http://jobappliances.herokuapp.com/api/v1/jobs";
+    private final String BASE = "http://jobappliances.herokuapp.com/api/v1";
 
     public List<Job> get() throws IOException {
         List<Job> jobs = new ArrayList<>();
@@ -40,33 +41,52 @@ public class JobRequest {
         return jobs;
     }
 
-    public List<Candidate> candidates(Job job, Context context) throws MalformedURLException {
+    public List<Candidate> candidates(Job job) throws MalformedURLException {
         List<Candidate> candidates = new ArrayList<>();
         Gson gson = new Gson();
         Json json = new Json();
-        String url = "http://jobappliances.herokuapp.com/api/v1/jobs/"+job.getId()+"/candidates";
+        String url = ENDPOINT+"/"+job.getId()+"/candidates";
 
         Map<String,String> paramns = new HashMap<>();
         paramns.put("Authorization","vibe2018");
 
-        String jsonRequest = json.postFromUrl(url,context,paramns);
+        String jsonRequest = json.postFromUrl(url,paramns);
         String index = "candidates";
 
-//        JsonParser jParser = new JsonParser();
+        JsonParser jParser = new JsonParser();
 
-//        JsonObject jObject = jParser.parse(jsonRequest).getAsJsonObject();
+        JsonObject jObject = jParser.parse(jsonRequest).getAsJsonObject();
 
-//        JsonArray jArray = jObject.get(index).getAsJsonArray();
+        JsonArray jArray = jObject.get(index).getAsJsonArray();
 
-        Log.d("Resultado",paramns.toString());
+        Log.d("Resultado",jsonRequest);
 
-//
-//        for (JsonElement element : jArray) {
-//            Candidate candidate = gson.fromJson(element, Candidate.class);
-//            candidates.add(candidate);
-//        }
+
+        for (JsonElement element : jArray) {
+            Candidate candidate = gson.fromJson(element, Candidate.class);
+            candidates.add(candidate);
+        }
 
         return candidates;
+    }
+
+    public Candidate findCandidate(String id) throws IOException {
+        List<Job> jobs = new ArrayList<>();
+        Gson gson = new Gson();
+        Json json = new Json();
+
+        String url = BASE+"/candidates/"+id;
+
+        Map<String,String> paramns = new HashMap<>();
+        paramns.put("Authorization","vibe2018");
+
+        String jsonRequest = json.getFromUrl(url,paramns);
+
+        JsonObject jObject = (new JsonParser()).parse(jsonRequest).getAsJsonObject();
+
+        Candidate candidate = gson.fromJson(jObject,Candidate.class);
+
+        return candidate;
     }
 
 }
